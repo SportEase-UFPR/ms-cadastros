@@ -1,0 +1,140 @@
+package br.ufpr.mscadastros.service;
+
+import br.ufpr.mscadastros.exceptions.ConflictException;
+import br.ufpr.mscadastros.exceptions.EntityNotFoundException;
+import br.ufpr.mscadastros.model.dto.cliente.*;
+import br.ufpr.mscadastros.model.dto.cliente.ClienteAlterarEmailRequest;
+import br.ufpr.mscadastros.model.dto.cliente.ClienteAlterarEmailResponse;
+import br.ufpr.mscadastros.model.entity.Cliente;
+import br.ufpr.mscadastros.model.enums.NivelAcesso;
+import br.ufpr.mscadastros.repository.ClienteRepository;
+import br.ufpr.mscadastros.security.TokenService;
+import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+@Service
+public class ClienteService {
+    public static final String CLIENTE_NAO_ENCONTRADO = "cliente não encontrado";
+    private final EmailService emailService;
+    private final TokenService tokenService;
+    private final ClienteRepository clienteRepository;
+
+
+    public ClienteService(EmailService emailService, TokenService tokenService, ClienteRepository clienteRepository) {
+        this.emailService = emailService;
+        this.tokenService = tokenService;
+        this.clienteRepository = clienteRepository;
+    }
+
+    @Transactional
+    public ClienteCriacaoResponse criarCliente(ClienteCriacaoRequest cliente) {
+        if(Boolean.TRUE.equals(clienteRepository.existsByEmail(cliente.getEmail()))) {
+            throw new ConflictException("Email já cadastrado");
+        }
+        if(Boolean.TRUE.equals(clienteRepository.existsByCpf(cliente.getCpf()))) {
+            throw new ConflictException("Cpf já cadastrado");
+        }
+        //Criação do novo cliente
+        Cliente novoCliente = new Cliente(cliente);
+        clienteRepository.save(novoCliente);
+
+        //Gerar token de ativação de conta
+        String tokenAtivacaoConta = tokenService.gerarTokenComEmailSemExpiracao(cliente.getIdUsuario().toString(), NivelAcesso.ROLE_CLIENTE, cliente.getEmail());
+
+        //Envio de email de ativação de conta
+        emailService.enviarEmailAtivacaoConta(cliente.getEmail(), cliente.getNome(), tokenAtivacaoConta);
+
+        return new ClienteCriacaoResponse(novoCliente);
+    }
+
+    public ClienteBuscaResponse buscarClientePorId(Long id) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(CLIENTE_NAO_ENCONTRADO));
+        return new ClienteBuscaResponse(cliente);
+    }
+
+    @Transactional
+    public ClienteAlteracaoResponse atualizarDadosCliente(ClienteAlteracaoRequest request, String token) {
+        //recuperar do id do usuário do token
+        String idUsuario = tokenService.getSubject(token);
+
+        //Recuperar Cliente
+        Cliente cliente = clienteRepository.findByIdUsuario(Long.parseLong(idUsuario))
+                .orElseThrow(() -> new EntityNotFoundException(CLIENTE_NAO_ENCONTRADO));
+
+        if(Boolean.TRUE.equals(clienteRepository.existsByEmail(request.getEmail())) && !cliente.getEmail().equals(request.getEmail())) {
+            throw new ConflictException("Email já cadastrado");
+        }
+
+        //altera o nome, caso ele seja passado na requisição
+        if(StringUtils.isNotBlank(request.getNome())) {
+        cliente.setNome(request.getNome());
+        }
+
+        clienteRepository.save(cliente);
+
+
+        //Para alterar o email, é necessário validar ele, clicando no link enviado para o novo email
+        if(StringUtils.isNotBlank(request.getEmail()) && !cliente.getEmail().equals(request.getEmail())) {
+
+            String tokenAlteracaoEmail = tokenService.gerarTokenComEmailSemExpiracao(idUsuario, NivelAcesso.ROLE_CLIENTE, request.getEmail());
+            emailService.enviarEmailConfirmacaoNovoEmail(request.getEmail(), cliente.getNome(), tokenAlteracaoEmail);
+
+            return ClienteAlteracaoResponse.builder()
+                    .mensagem("Dados do cliente alterado e mensagem enviada para " + request.getEmail())
+                    .build();
+        }
+
+
+        return ClienteAlteracaoResponse.builder()
+                .mensagem("Dados do cliente foram atualizados com sucesso")
+                .build();
+
+    }
+
+    public ClienteAlterarEmailResponse alterarEmail(ClienteAlterarEmailRequest request) {
+        //recuperar o id e o email do token
+        String idUsuario = tokenService.getSubject(request.getTokenUsuarioComNovoEmail());
+        String novoEmail = tokenService.getIssuer(request.getTokenUsuarioComNovoEmail(), "email");
+
+        //recuperar cliente
+        Cliente cliente = clienteRepository.findByIdUsuario(Long.parseLong(idUsuario))
+                .orElseThrow(() -> new EntityNotFoundException(CLIENTE_NAO_ENCONTRADO));
+
+        //atualizar email de Cliente
+        cliente.setEmail(novoEmail);
+        clienteRepository.save(cliente);
+
+        return ClienteAlterarEmailResponse.builder()
+                .idConta(idUsuario)
+                .novoEmail(novoEmail)
+                .build();
+
+    }
+
+    public ClienteBuscaResponse buscarDadosClienteLogado(String token) {
+        String idUsuario = tokenService.getSubject(token);
+
+        Cliente cliente = clienteRepository.findByIdUsuario(Long.parseLong(idUsuario))
+                .orElseThrow(() -> new EntityNotFoundException(CLIENTE_NAO_ENCONTRADO));
+
+        return new ClienteBuscaResponse(cliente);
+    }
+
+    public List<BuscarEmailsClientesResponse> buscarEmailsClientes() {
+        List<Cliente> listaClientes = clienteRepository.findAll();
+        if(listaClientes.isEmpty()) {
+            throw new EntityNotFoundException("Não há clientes cadastrados");
+        }
+        List<BuscarEmailsClientesResponse> response = new ArrayList<>();
+        listaClientes.forEach(cliente ->
+                response.add(new BuscarEmailsClientesResponse(cliente)));
+        return response;
+    }
+
+}
