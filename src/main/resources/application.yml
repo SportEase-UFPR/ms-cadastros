@@ -1,0 +1,60 @@
+server:
+  port: 8081
+
+# Configurações do Banco de dados
+spring:
+  datasource:
+    url: jdbc:postgresql://dpg-ckvg7gramefc7389jqk0-a.oregon-postgres.render.com/db_sport_ease
+    username: renderpostgres
+    password: vsEBkTrS2Dfod6Fbe5mbW2hXIKfC67oP
+  jpa:
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+    hibernate:
+      ddl-auto: update
+
+# Configurações de e-mail
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: sportease.ufpr@gmail.com
+    password: tfhaynsmjgdqoeee
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# Configurações do Token JWT
+api:
+  security:
+    token:
+      user:
+        secret: ${JWT_USER_SECRET:SENHA_SECRETA_PARA_VALIDAR_AUTENTICACAO_DO_USUARIO}
+      apigateway:
+        secret: ${JWT_GATEWAY_SECRET:SENHA_SECRETA_PARA_VALIDAR_API_GATEWAY}
+      mscadastro:
+        secret: ${JWT_MS_CADASTRO_SECRET:SENHA_SECRETA_PARA_VALIDAR_MS_CADASTRO}
+      mslocacoes:
+        secret: ${JWT_MS_LOCACOES_SECRET:SENHA_SECRETA_PARA_VALIDAR_MS_LOCACOES}
+  gateway:
+    issuer: API GATEWAY SPORTEASE UFPR
+  user:
+    issuer: USER ISSUER SPORTEASE UFPR
+  mscadastro:
+    issuer: API MS CADASTRO SPORTEASE UFPR
+  mslocacoes:
+    issuer: MS LOCACOES ISSUER SPORTEASE UFPR
+
+# URLs
+url:
+  ativacao:
+    conta: http://localhost:4200/ativar-conta
+  recuperacao:
+    senha: http://localhost:4200/cadastrar-senha
+  alteracao:
+    email: http://localhost:4200/ativar-email
+  apigateway:
+    usuario: http://localhost:8080/usuarios/

@@ -19,13 +19,13 @@ import java.util.concurrent.Executors;
 public class EmailService {
     private final JavaMailSender mailSender;
 
-    @Value("${url.ativacao.conta}") //application.properties
+    @Value("${url.ativacao.conta}") //application.yml
     private String urlAtivacaoConta;
 
-    @Value("${url.recuperacao.senha}") //application.properties
+    @Value("${url.recuperacao.senha}") //application.yml
     private String urlRecuperacaoSenha;
 
-    @Value("${url.alteracao.email}") //application.properties
+    @Value("${url.alteracao.email}") //application.yml
     private String urlAlteracaoEmail;
 
     public EmailService(JavaMailSender mailSender) {
