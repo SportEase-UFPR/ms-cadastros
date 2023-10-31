@@ -5,6 +5,7 @@ import br.ufpr.mscadastros.repository.EspacoEsportivoRepository;
 import br.ufpr.mscadastros.security.TokenService;
 import br.ufpr.mscadastros.service.EspacoEsportivoService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @CrossOrigin(origins ="*")
 @RestController
 @RequestMapping("/espacos-esportivos")
+@Slf4j
 public class EspacoEsportivoController {
 
     private final EspacoEsportivoService espacoEsportivoService;
@@ -43,6 +45,7 @@ public class EspacoEsportivoController {
 
     @GetMapping("/{espEsportivoId}")
     public ResponseEntity<EspEsportivoBuscaResponse> buscarEspacoEsportivoPorId(@PathVariable Long espEsportivoId) {
+        log.info("INICIO buscarEspacoEsportivoPorId ms-cadastros");
         return ResponseEntity.status(HttpStatus.OK).body(espacoEsportivoService.buscarEspacoEsportivoPorId(espEsportivoId));
     }
 
