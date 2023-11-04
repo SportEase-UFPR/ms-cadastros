@@ -12,6 +12,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,6 +27,12 @@ public class AdmService {
     private final EmailService emailService;
 
     private final ApiGatewayClient apiGatewayClient;
+
+    @Value("${url.alteracao.email_adm}")
+    private String urlAlteracaoEmailAdm;
+
+    @Value("${url.ativacao.conta_adm}")
+    private String urlAtivacaoContaAdm;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -49,7 +56,7 @@ public class AdmService {
                 NivelAcesso.ROLE_ADM, request.getNovoEmail());
 
         //enviar email
-        emailService.enviarEmailConfirmacaoNovoEmail(request.getNovoEmail(), adm.getNome(), tokenAlteracaoEmail);
+        emailService.enviarEmailConfirmacaoNovoEmail(request.getNovoEmail(), adm.getNome(), tokenAlteracaoEmail, urlAlteracaoEmailAdm);
 
         return AdmAlterarEmailSolicitacaoResponse.builder()
                 .mensagem("Mensagem de alteração de email enviada para " + request.getNovoEmail())
@@ -107,7 +114,7 @@ public class AdmService {
         String tokenAtivacaoConta = tokenService.gerarTokenComEmailSemExpiracao(adm.getIdUsuario().toString(), NivelAcesso.ROLE_ADM, adm.getEmail());
 
         //Envio de email de ativação de conta
-        emailService.enviarEmailAtivacaoConta(adm.getEmail(), adm.getNome(), tokenAtivacaoConta);
+        emailService.enviarEmailAtivacaoConta(adm.getEmail(), adm.getNome(), tokenAtivacaoConta, urlAtivacaoContaAdm);
 
         return new AdmCriacaoResponse(novoAdm);
     }
@@ -167,7 +174,7 @@ public class AdmService {
         //Para alterar o email, é necessário validar ele, clicando no link enviado para o novo email
         if (StringUtils.isNotBlank(request.getEmail()) && !adm.getEmail().equals(request.getEmail())) {
             String tokenAlteracaoEmail = tokenService.gerarTokenComEmailSemExpiracao(idUsuario, NivelAcesso.ROLE_ADM, request.getEmail());
-            emailService.enviarEmailConfirmacaoNovoEmail(request.getEmail(), adm.getNome(), tokenAlteracaoEmail);
+            emailService.enviarEmailConfirmacaoNovoEmail(request.getEmail(), adm.getNome(), tokenAlteracaoEmail, urlAlteracaoEmailAdm);
 
             return AdmAlteracaoResponse.builder()
                     .idAdm(adm.getId())

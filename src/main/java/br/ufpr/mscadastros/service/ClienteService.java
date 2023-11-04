@@ -11,6 +11,7 @@ import br.ufpr.mscadastros.repository.ClienteRepository;
 import br.ufpr.mscadastros.security.TokenService;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +24,13 @@ public class ClienteService {
     private final EmailService emailService;
     private final TokenService tokenService;
     private final ClienteRepository clienteRepository;
+
+    @Value("${url.alteracao.email_cliente}")
+    private String urlAlteracaoEmailCliente;
+
+    @Value("${url.ativacao.conta_cliente}")
+    private String urlAtivacaoContaCliente;
+
 
 
     public ClienteService(EmailService emailService, TokenService tokenService, ClienteRepository clienteRepository) {
@@ -47,7 +55,7 @@ public class ClienteService {
         String tokenAtivacaoConta = tokenService.gerarTokenComEmailSemExpiracao(cliente.getIdUsuario().toString(), NivelAcesso.ROLE_CLIENTE, cliente.getEmail());
 
         //Envio de email de ativação de conta
-        emailService.enviarEmailAtivacaoConta(cliente.getEmail(), cliente.getNome(), tokenAtivacaoConta);
+        emailService.enviarEmailAtivacaoConta(cliente.getEmail(), cliente.getNome(), tokenAtivacaoConta, urlAtivacaoContaCliente);
 
         return new ClienteCriacaoResponse(novoCliente);
     }
@@ -83,7 +91,7 @@ public class ClienteService {
         if(StringUtils.isNotBlank(request.getEmail()) && !cliente.getEmail().equals(request.getEmail())) {
 
             String tokenAlteracaoEmail = tokenService.gerarTokenComEmailSemExpiracao(idUsuario, NivelAcesso.ROLE_CLIENTE, request.getEmail());
-            emailService.enviarEmailConfirmacaoNovoEmail(request.getEmail(), cliente.getNome(), tokenAlteracaoEmail);
+            emailService.enviarEmailConfirmacaoNovoEmail(request.getEmail(), cliente.getNome(), tokenAlteracaoEmail, urlAlteracaoEmailCliente);
 
             return ClienteAlteracaoResponse.builder()
                     .mensagem("Dados do cliente alterado e mensagem enviada para " + request.getEmail())

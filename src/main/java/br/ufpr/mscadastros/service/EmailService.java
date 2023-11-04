@@ -5,7 +5,6 @@ import br.ufpr.mscadastros.model.dto.email.EnviarEmailRequest;
 import br.ufpr.mscadastros.model.dto.email.EnviarEmailResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -19,21 +18,12 @@ import java.util.concurrent.Executors;
 public class EmailService {
     private final JavaMailSender mailSender;
 
-    @Value("${url.ativacao.conta}") //application.properties
-    private String urlAtivacaoConta;
-
-    @Value("${url.recuperacao.senha}") //application.properties
-    private String urlRecuperacaoSenha;
-
-    @Value("${url.alteracao.email}") //application.properties
-    private String urlAlteracaoEmail;
-
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
-    public void enviarEmailAtivacaoConta(String email, String nome, String tokenAtivacao) {
-        String linkAtivacao = urlAtivacaoConta + "?token=" + tokenAtivacao;
+    public void enviarEmailAtivacaoConta(String email, String nome, String tokenAtivacao, String urlBase) {
+        String linkAtivacao = urlBase + "?token=" + tokenAtivacao;
 
         MimeMessage mensagem = mailSender.createMimeMessage();
         MimeMessageHelper helper;
@@ -62,8 +52,8 @@ public class EmailService {
         return corpoEmail;
     }
 
-    public void enviarEmailRecuperacaoSenha(String email, String nome, String tokenRecuperacaoSenha) {
-        String linkAtivacao = urlRecuperacaoSenha + "?token=" + tokenRecuperacaoSenha;
+    public void enviarEmailRecuperacaoSenha(String email, String nome, String tokenRecuperacaoSenha, String urlBase) {
+        String linkAtivacao = urlBase + "?token=" + tokenRecuperacaoSenha;
 
         MimeMessage mensagem = mailSender.createMimeMessage();
         MimeMessageHelper helper;
@@ -94,8 +84,8 @@ public class EmailService {
     }
 
 
-    public void enviarEmailConfirmacaoNovoEmail(String novoEmail, String nome, String tokenAlteracaoEmail) {
-        String linkAtualizacaoEmail = urlAlteracaoEmail + "?token=" + tokenAlteracaoEmail;
+    public void enviarEmailConfirmacaoNovoEmail(String novoEmail, String nome, String tokenAlteracaoEmail, String urlBase) {
+        String linkAtualizacaoEmail = urlBase + "?token=" + tokenAlteracaoEmail;
         MimeMessage mensagem = mailSender.createMimeMessage();
         MimeMessageHelper helper;
         try {
@@ -148,7 +138,7 @@ public class EmailService {
 
         executorService.shutdown();
 
-        while (!executorService.isTerminated()) {/*aguardando...*/}
+        while (!executorService.isTerminated()) {}
         return EnviarEmailResponse.builder()
                 .mensagem("emails enviados com sucesso")
                 .build();

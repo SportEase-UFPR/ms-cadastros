@@ -52,6 +52,15 @@ public class TokenService {
                 .sign(algoritmo);
     }
 
+    public String gerarTokenComEmailSemExpiracao(String idUsuario, String email) {
+        var algoritmo = Algorithm.HMAC256(userSecret);
+        return JWT.create()
+                .withIssuer(apiUserIssuer)
+                .withSubject(idUsuario)
+                .withClaim("email", email)
+                .sign(algoritmo);
+    }
+
     public void validarToken(String tokenJWT) {
         var tokenFormatado = removerPrefixoToken(tokenJWT);
         try {
