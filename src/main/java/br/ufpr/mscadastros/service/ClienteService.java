@@ -145,4 +145,12 @@ public class ClienteService {
         return response;
     }
 
+    public List<NomeClienteResponse> buscarNomesClientes(List<Long> ids) {
+        var response = new ArrayList<NomeClienteResponse>();
+        ids.forEach(id -> {
+            var cliente = clienteRepository.findById(id);
+            cliente.ifPresent(c -> response.add(new NomeClienteResponse(c)));
+        });
+        return response;
+    }
 }

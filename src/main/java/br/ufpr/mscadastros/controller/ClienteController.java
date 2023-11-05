@@ -8,6 +8,7 @@ import br.ufpr.mscadastros.model.dto.email.EnviarEmailRequest;
 import br.ufpr.mscadastros.model.dto.email.EnviarEmailResponse;
 import br.ufpr.mscadastros.model.dto.email.EnviarEmailTodosRequest;
 import br.ufpr.mscadastros.repository.ClienteRepository;
+import br.ufpr.mscadastros.security.TokenService;
 import br.ufpr.mscadastros.service.ClienteService;
 import br.ufpr.mscadastros.service.EmailService;
 import jakarta.validation.Valid;
@@ -25,11 +26,13 @@ public class ClienteController {
     private final ClienteService clienteService;
     private final ClienteRepository repository;
     private final EmailService emailService;
+    private final TokenService tokenService;
 
-    public ClienteController(ClienteService clienteService, ClienteRepository repository, EmailService emailService) {
+    public ClienteController(ClienteService clienteService, ClienteRepository repository, EmailService emailService, TokenService tokenService) {
         this.clienteService = clienteService;
         this.repository = repository;
         this.emailService = emailService;
+        this.tokenService = tokenService;
     }
 
     @PostMapping
@@ -89,6 +92,13 @@ public class ClienteController {
                         .corpo(request.getCorpo())
                         .listaEmails(listaEmailsClientes)
                 .build()));
+    }
+
+    @PostMapping("/buscar-lista-nomes")
+    public ResponseEntity<List<NomeClienteResponse>> buscarNomesClientes(@RequestBody List<Long> request,
+                                                                       @RequestHeader("AuthorizationApi") String token) {
+        tokenService.validarTokenApiMsLocacoes(token);
+        return ResponseEntity.status(HttpStatus.OK).body(clienteService.buscarNomesClientes(request));
     }
 }
 

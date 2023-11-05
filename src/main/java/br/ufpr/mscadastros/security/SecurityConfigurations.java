@@ -38,6 +38,7 @@ public class SecurityConfigurations {
                 .requestMatchers(HttpMethod.GET, "/espacos-esportivos/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/espacos-esportivos/buscar-inf-complementares-locacao").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/espacos-esportivos/atualizar-media-avaliacao/*").permitAll()
+                .requestMatchers(HttpMethod.POST, "/clientes/buscar-lista-nomes").permitAll()
                 .anyRequest().authenticated()
                 .and().addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class) //serve para chamar o filtro (SecurityFilter) antes do filtro do spring
                 .build();
