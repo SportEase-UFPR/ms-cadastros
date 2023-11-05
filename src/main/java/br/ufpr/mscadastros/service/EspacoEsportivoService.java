@@ -128,4 +128,25 @@ public class EspacoEsportivoService {
 
         return response;
     }
+
+    public Void atualizarMediaAvaliacaoEspacoEsportivo(Long idEspacoEsportivo, AtualizarMediaAvaliacaoEERequest request) {
+        var espacoEsportivo = repository.findById(idEspacoEsportivo)
+                .orElseThrow(() -> new EntityNotFoundException("Espaço esportivo não encontrado"));
+
+        if(espacoEsportivo.getContagemAvaliacoes() == null || espacoEsportivo.getContagemAvaliacoes() == 0) {
+            espacoEsportivo.setMediaAvaliacao(Double.valueOf(request.getAvaliacao()));
+            espacoEsportivo.setContagemAvaliacoes(1);
+        } else {
+            var mediaAtual = espacoEsportivo.getMediaAvaliacao();
+            var contagemAvaliacoes = espacoEsportivo.getContagemAvaliacoes();
+            var novaAvaliacao = request.getAvaliacao();
+
+            var novaMedia = (mediaAtual * contagemAvaliacoes + novaAvaliacao) / (contagemAvaliacoes + 1);
+
+            espacoEsportivo.setMediaAvaliacao(novaMedia);
+            espacoEsportivo.setContagemAvaliacoes(contagemAvaliacoes + 1);
+        }
+        repository.save(espacoEsportivo);
+        return null;
+    }
 }

@@ -32,6 +32,7 @@ public class EspEsportivoBuscaResponse {
     private LocalTime periodoLocacao;
     private Integer maxLocacaoDia;
     private List<EsporteResponse> listaEsportes = new ArrayList<>();
+    private Double mediaAvaliacoes;
     private String imagemBase64;
 
     public EspEsportivoBuscaResponse(EspacoEsportivo ee) {
@@ -49,5 +50,11 @@ public class EspEsportivoBuscaResponse {
         this.maxLocacaoDia = ee.getMaxLocacaoDia();
         this.imagemBase64 = Base64.getEncoder().encodeToString(ee.getImagemBase64());
         ee.getListaEsportes().forEach(esporte -> listaEsportes.add(new EsporteResponse(esporte)));
+
+        if (ee.getMediaAvaliacao() != null) {
+            //arredonda pra 1 casa decimal
+            var mediaAvaliacao = ee.getMediaAvaliacao();
+            mediaAvaliacoes = Math.round(mediaAvaliacao * 10.0) / 10.0;
+        }
     }
 }

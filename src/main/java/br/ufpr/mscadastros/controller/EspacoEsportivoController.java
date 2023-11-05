@@ -76,4 +76,12 @@ public class EspacoEsportivoController {
         tokenService.validarTokenApiMsLocacoes(token);
         return ResponseEntity.status(HttpStatus.OK).body(espacoEsportivoService.buscarInformacoesComplementaresLocacao(request));
     }
+
+    @PutMapping("/atualizar-media-avaliacao/{idEspacoEsportivo}")
+    public ResponseEntity<Void> atualizarMediaAvaliacaoEspacoEsportivo(@PathVariable Long idEspacoEsportivo,
+                                                                       @RequestBody AtualizarMediaAvaliacaoEERequest request,
+                                                                       @RequestHeader("AuthorizationApi") String token) {
+        tokenService.validarTokenApiMsLocacoes(token);
+        return ResponseEntity.status(HttpStatus.OK).body(espacoEsportivoService.atualizarMediaAvaliacaoEspacoEsportivo(idEspacoEsportivo, request));
+    }
 }
