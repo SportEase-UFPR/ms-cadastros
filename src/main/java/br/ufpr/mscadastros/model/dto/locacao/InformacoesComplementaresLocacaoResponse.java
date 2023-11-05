@@ -21,6 +21,7 @@ public class InformacoesComplementaresLocacaoResponse {
     private String nomeCliente;
     private String cpfCliente;
     private Boolean alunoUFPR;
+    private String emailCliente;
     private String grr;
 
     public InformacoesComplementaresLocacaoResponse(EspacoEsportivo espEsport, Cliente cliente, Long idLocacao) {
@@ -32,6 +33,7 @@ public class InformacoesComplementaresLocacaoResponse {
         this.nomeCliente = cliente.getNome();
         this.cpfCliente = cliente.getCpf();
         this.alunoUFPR = cliente.getAlunoUFPR();
+        this.emailCliente = cliente.getEmail();
         this.grr = cliente.getGrr();
     }
 }
