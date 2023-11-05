@@ -1,6 +1,8 @@
 package br.ufpr.mscadastros.controller;
 
 import br.ufpr.mscadastros.model.dto.espaco_esportivo.*;
+import br.ufpr.mscadastros.model.dto.locacao.InformacoesComplementaresLocacaoRequest;
+import br.ufpr.mscadastros.model.dto.locacao.InformacoesComplementaresLocacaoResponse;
 import br.ufpr.mscadastros.repository.EspacoEsportivoRepository;
 import br.ufpr.mscadastros.security.TokenService;
 import br.ufpr.mscadastros.service.EspacoEsportivoService;
@@ -45,7 +47,6 @@ public class EspacoEsportivoController {
 
     @GetMapping("/{espEsportivoId}")
     public ResponseEntity<EspEsportivoBuscaResponse> buscarEspacoEsportivoPorId(@PathVariable Long espEsportivoId) {
-        log.info("INICIO buscarEspacoEsportivoPorId ms-cadastros");
         return ResponseEntity.status(HttpStatus.OK).body(espacoEsportivoService.buscarEspacoEsportivoPorId(espEsportivoId));
     }
 
@@ -65,5 +66,14 @@ public class EspacoEsportivoController {
         //validar token
         tokenService.validarTokenApiMsLocacoes(token);
         return ResponseEntity.status(HttpStatus.OK).body(repository.existsById(espEsportivoId));
+    }
+
+    @PostMapping("/buscar-inf-complementares-locacao")
+    public ResponseEntity<List<InformacoesComplementaresLocacaoResponse>>
+    buscarInformacoesComplementaresLocacao(@RequestBody List<InformacoesComplementaresLocacaoRequest> request,
+                                           @RequestHeader("AuthorizationApi") String token) {
+        //validar token
+        tokenService.validarTokenApiMsLocacoes(token);
+        return ResponseEntity.status(HttpStatus.OK).body(espacoEsportivoService.buscarInformacoesComplementaresLocacao(request));
     }
 }
