@@ -100,5 +100,12 @@ public class ClienteController {
         tokenService.validarTokenApiMsLocacoes(token);
         return ResponseEntity.status(HttpStatus.OK).body(clienteService.buscarNomesClientes(request));
     }
+
+    @GetMapping("/buscar-ids")
+    public ResponseEntity<List<Long>> buscarIdsClientes(@RequestHeader("AuthorizationApi") String token) {
+        tokenService.validarTokenApiMsComunicacoes(token);
+        return ResponseEntity.status(HttpStatus.OK).body(clienteService.buscarIdsClientes());
+    }
+
 }
 

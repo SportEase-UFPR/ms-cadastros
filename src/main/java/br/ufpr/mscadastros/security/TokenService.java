@@ -41,6 +41,12 @@ public class TokenService {
     @Value("${api.security.token.mslocacoes.secret}")
     private String msLocacoesSecret;
 
+    @Value("${api.mscomunicacoes.issuer}")
+    private String msComunicacoesIssuer;
+
+    @Value("${api.security.token.mscomunicacoes.secret}")
+    private String msComunicacoesSecret;
+
     public String gerarTokenComEmailSemExpiracao(String idUsuario, NivelAcesso nivelAcesso, String email) {
         var algoritmo = Algorithm.HMAC256(userSecret);
         return JWT.create()
@@ -108,6 +114,20 @@ public class TokenService {
             var algoritmo = Algorithm.HMAC256(msLocacoesSecret);
             JWT.require(algoritmo)
                     .withIssuer(msLocacoesIssuer)
+                    .build()
+                    .verify(tokenFormatado);
+        } catch (JWTVerificationException ex) {
+            log.error(ex.getMessage());
+            throw new TokenInvalidoException("Token JWT inválido ou expirado");
+        }
+    }
+
+    public void validarTokenApiMsComunicacoes(String tokenApi) {
+        var tokenFormatado = removerPrefixoToken(tokenApi);
+        try {
+            var algoritmo = Algorithm.HMAC256(msComunicacoesSecret);
+            JWT.require(algoritmo)
+                    .withIssuer(msComunicacoesIssuer)
                     .build()
                     .verify(tokenFormatado);
         } catch (JWTVerificationException ex) {

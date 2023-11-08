@@ -153,4 +153,11 @@ public class ClienteService {
         });
         return response;
     }
+
+    public List<Long> buscarIdsClientes() {
+        var listaClientes = clienteRepository.findAll();
+        return listaClientes.stream()
+                .map(Cliente::getId)
+                .toList();
+    }
 }
