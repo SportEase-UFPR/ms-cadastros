@@ -149,4 +149,13 @@ public class EspacoEsportivoService {
         repository.save(espacoEsportivo);
         return null;
     }
+
+    public List<EspacoEsportivoSimplificado> buscarEspacoesEsportivosSimplificado(List<Long> ids) {
+        var response = new ArrayList<EspacoEsportivoSimplificado>();
+        ids.forEach(id -> {
+            var espacoEsportivo = repository.findById(id);
+            espacoEsportivo.ifPresent(ee -> response.add(new EspacoEsportivoSimplificado(ee)));
+        });
+        return response;
+    }
 }

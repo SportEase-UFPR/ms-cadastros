@@ -84,4 +84,11 @@ public class EspacoEsportivoController {
         tokenService.validarTokenApiMsLocacoes(token);
         return ResponseEntity.status(HttpStatus.OK).body(espacoEsportivoService.atualizarMediaAvaliacaoEspacoEsportivo(idEspacoEsportivo, request));
     }
+
+    @PostMapping("/buscar-lista-ee-simplificado")
+    public ResponseEntity<List<EspacoEsportivoSimplificado>> buscarEspacoesEsportivosSimplificado(@RequestBody List<Long> request,
+                                                                         @RequestHeader("AuthorizationApi") String token) {
+        tokenService.validarTokenApiMsLocacoes(token);
+        return ResponseEntity.status(HttpStatus.OK).body(espacoEsportivoService.buscarEspacoesEsportivosSimplificado(request));
+    }
 }
