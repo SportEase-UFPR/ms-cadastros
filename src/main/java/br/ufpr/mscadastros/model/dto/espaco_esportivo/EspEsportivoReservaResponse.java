@@ -25,6 +25,7 @@ public class EspEsportivoReservaResponse {
     private List<Integer> diasFuncionamento;
     private Short capacidadeMin;
     private Short capacidadeMax;
+    private Integer maxLocacaoDia;
 
 
 
@@ -33,6 +34,7 @@ public class EspEsportivoReservaResponse {
         this.nome = ee.getNome();
         this.capacidadeMin = ee.getCapacidadeMin();
         this.capacidadeMax = ee.getCapacidadeMax();
+        this.maxLocacaoDia = ee.getMaxLocacaoDia();
         ee.getListaEsportes().forEach(esporte -> listaEsportes.add(new EsporteResponse(esporte)));
 
         this.diasFuncionamento = Arrays.stream(ee.getDiasFuncionamento().split(","))
