@@ -107,5 +107,10 @@ public class ClienteController {
         return ResponseEntity.status(HttpStatus.OK).body(clienteService.buscarIdsClientes());
     }
 
+    @GetMapping("/detalhes")
+    public ResponseEntity<List<ClienteBuscaDetalhadaResponse>> buscarDetalhesCliente() {
+        return ResponseEntity.status(HttpStatus.OK).body(clienteService.buscarDetalhesCliente());
+    }
+
 }
 

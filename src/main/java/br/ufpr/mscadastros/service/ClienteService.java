@@ -1,5 +1,6 @@
 package br.ufpr.mscadastros.service;
 
+import br.ufpr.mscadastros.client.MsLocacoesClient;
 import br.ufpr.mscadastros.exceptions.ConflictException;
 import br.ufpr.mscadastros.exceptions.EntityNotFoundException;
 import br.ufpr.mscadastros.model.dto.cliente.*;
@@ -31,12 +32,15 @@ public class ClienteService {
     @Value("${url.ativacao.conta_cliente}")
     private String urlAtivacaoContaCliente;
 
+    private final MsLocacoesClient msLocacoesClient;
 
 
-    public ClienteService(EmailService emailService, TokenService tokenService, ClienteRepository clienteRepository) {
+
+    public ClienteService(EmailService emailService, TokenService tokenService, ClienteRepository clienteRepository, MsLocacoesClient msLocacoesClient) {
         this.emailService = emailService;
         this.tokenService = tokenService;
         this.clienteRepository = clienteRepository;
+        this.msLocacoesClient = msLocacoesClient;
     }
 
     @Transactional
@@ -159,5 +163,17 @@ public class ClienteService {
         return listaClientes.stream()
                 .map(Cliente::getId)
                 .toList();
+    }
+
+    public List<ClienteBuscaDetalhadaResponse> buscarDetalhesCliente() {
+        var estatisticasReservas = msLocacoesClient.buscarEstatisticasReserva();
+
+        var clienteBuscaDetalhadaList = new ArrayList<ClienteBuscaDetalhadaResponse>();
+        estatisticasReservas.forEach(estatistica -> {
+            var cliente = clienteRepository.findById(estatistica.getIdCliente());
+            cliente.ifPresent(c -> clienteBuscaDetalhadaList.add(new ClienteBuscaDetalhadaResponse(c, estatistica)));
+        });
+
+        return clienteBuscaDetalhadaList;
     }
 }
