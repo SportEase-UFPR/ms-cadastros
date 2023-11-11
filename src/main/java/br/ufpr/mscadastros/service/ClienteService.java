@@ -91,6 +91,15 @@ public class ClienteService {
         cliente.setNome(request.getNome());
         }
 
+        //alterar vínculo com a UFPR e grr:
+        if(request.getGrr() != null) {
+            cliente.setAlunoUFPR(true);
+            cliente.setGrr(request.getGrr());
+        } else if (request.getAlunoUFPR() != null && Boolean.FALSE.equals(request.getAlunoUFPR())) {
+            cliente.setAlunoUFPR(false);
+            cliente.setGrr(null);
+        }
+
         clienteRepository.save(cliente);
 
 
