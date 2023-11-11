@@ -20,7 +20,8 @@ public class EspEsportivoAlteracaoRequest {
     private String localidade;
     private String piso;
     private String dimensoes;
-    private Short capacidade;
+    private Short capacidadeMin;
+    private Short capacidadeMax;
     private Boolean disponivel;
     private LocalTime horaAbertura;
     private LocalTime horaFechamento;
@@ -28,4 +29,5 @@ public class EspEsportivoAlteracaoRequest {
     private Integer maxLocacaoDia;
     private List<EsporteResponse> listaEsportes = new ArrayList<>();
     private String imagemBase64;
+    private List<Integer> diasFuncionamento;
 }

@@ -14,8 +14,10 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity(name = "tb_espaco_esportivo")
 @Getter
@@ -41,7 +43,9 @@ public class EspacoEsportivo {
     @Column(length = 10)
     private String dimensoes;
 
-    private Short capacidade;
+    private Short capacidadeMin;
+
+    private Short capacidadeMax;
 
     @Column(nullable = false)
     private Boolean disponivel;
@@ -58,6 +62,9 @@ public class EspacoEsportivo {
 
     @Column(nullable = false)
     private Integer maxLocacaoDia;
+
+    @Column(nullable = false)
+    private String diasFuncionamento;
 
     @Lob
     @Column(columnDefinition = "MEDIUMBLOB")
@@ -78,7 +85,8 @@ public class EspacoEsportivo {
         this.localidade = request.getLocalidade();
         this.piso = request.getPiso();
         this.dimensoes = request.getDimensoes();
-        this.capacidade = request.getCapacidade();
+        this.capacidadeMin = request.getCapacidadeMin();
+        this.capacidadeMax = request.getCapacidadeMax();
         this.disponivel = request.getDisponivel();
         this.horaAbertura = request.getHoraAbertura();
         this.horaFechamento = request.getHoraFechamento();
@@ -88,6 +96,10 @@ public class EspacoEsportivo {
 
         String strImgFormatada = StrUtils.removerPrefixoBase64(request.getImagemBase64());
         this.imagemBase64 = Base64.getDecoder().decode(strImgFormatada);
+
+        this.diasFuncionamento = request.getDiasFuncionamento().stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
     }
 
     public void editarDados(EspEsportivoAlteracaoRequest request) {
@@ -106,8 +118,11 @@ public class EspacoEsportivo {
         if(StringUtils.isNotBlank(request.getDescricao())) {
             this.descricao = request.getDescricao();
         }
-        if(request.getCapacidade() != null) {
-            this.capacidade = request.getCapacidade();
+        if(request.getCapacidadeMin() != null) {
+            this.capacidadeMin = request.getCapacidadeMin();
+        }
+        if(request.getCapacidadeMax() != null) {
+            this.capacidadeMax = request.getCapacidadeMax();
         }
         if(request.getHoraAbertura() != null) {
             this.horaAbertura = request.getHoraAbertura();
@@ -129,6 +144,13 @@ public class EspacoEsportivo {
         if(request.getDisponivel() != null) {
             this.disponivel = request.getDisponivel();
         }
+
+        if(request.getDiasFuncionamento() != null && !request.getDiasFuncionamento().isEmpty()) {
+            this.diasFuncionamento = request.getDiasFuncionamento().stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+        }
+
         this.listaEsportes = new ArrayList<>();
     }
 
@@ -148,6 +170,20 @@ public class EspacoEsportivo {
 
         if(Duration.between(LocalTime.MIN, periodoLocacao).compareTo(Duration.between(horaAbertura, horaFechamento)) > 0) {
             throw new BussinessException("periodoLocacao não pode ser superior ao período de funcionamento do espaço esportivo");
+        }
+
+        var diasDisponveisLista = Arrays.stream(diasFuncionamento.split(","))
+                .map(Integer::parseInt)
+                .toList();
+
+        diasDisponveisLista.forEach(dia -> {
+            if(dia < 0 || dia > 6) {
+                throw new BussinessException("Os dias disponíveis deve estar entre 0 e 6");
+            }
+        });
+
+        if(capacidadeMin != null && capacidadeMin > capacidadeMax) {
+            throw new BussinessException("A capacidade mínima deve ser menor que a capacidade máxima");
         }
     }
 }

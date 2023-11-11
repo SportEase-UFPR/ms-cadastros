@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -25,7 +26,8 @@ public class EspEsportivoBuscaResponse {
     private String localidade;
     private String piso;
     private String dimensoes;
-    private Short capacidade;
+    private Short capacidadeMin;
+    private Short capacidadeMax;
     private Boolean disponivel;
     private LocalTime horaAbertura;
     private LocalTime horaFechamento;
@@ -34,6 +36,7 @@ public class EspEsportivoBuscaResponse {
     private List<EsporteResponse> listaEsportes = new ArrayList<>();
     private Double mediaAvaliacoes;
     private String imagemBase64;
+    private List<Integer> diasFuncionamento;
 
     public EspEsportivoBuscaResponse(EspacoEsportivo ee) {
         this.id = ee.getId();
@@ -42,7 +45,8 @@ public class EspEsportivoBuscaResponse {
         this.localidade = ee.getLocalidade();
         this.piso = ee.getPiso();
         this.dimensoes = ee.getDimensoes();
-        this.capacidade = ee.getCapacidade();
+        this.capacidadeMin = ee.getCapacidadeMin();
+        this.capacidadeMax = ee.getCapacidadeMax();
         this.disponivel = ee.getDisponivel();
         this.horaAbertura = ee.getHoraAbertura();
         this.horaFechamento = ee.getHoraFechamento();
@@ -56,5 +60,9 @@ public class EspEsportivoBuscaResponse {
             var mediaAvaliacao = ee.getMediaAvaliacao();
             mediaAvaliacoes = Math.round(mediaAvaliacao * 10.0) / 10.0;
         }
+
+        this.diasFuncionamento = Arrays.stream(ee.getDiasFuncionamento().split(","))
+                .map(Integer::parseInt)
+                .toList();
     }
 }

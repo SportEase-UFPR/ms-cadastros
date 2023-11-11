@@ -24,7 +24,8 @@ public class EspEsportivoCriacaoRequest {
     private String localidade;
     private String piso;
     private String dimensoes;
-    private Short capacidade;
+    private Short capacidadeMin;
+    private Short capacidadeMax;
 
     @NotNull(message = "O campo disponivel é obrigatório")
     private Boolean disponivel;
@@ -44,6 +45,9 @@ public class EspEsportivoCriacaoRequest {
 
     @NotNull(message = "O campo listaEsportes é obrigatório")
     private List<EsporteResponse> listaEsportes = new ArrayList<>();
+
+    @NotNull(message = "O campo diasFuncionamento é obrigatório")
+    private List<Integer> diasFuncionamento;
 
     private String imagemBase64;
 

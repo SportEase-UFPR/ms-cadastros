@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -25,7 +26,8 @@ public class EspEsportivoCriacaoResponse {
     private String localidade;
     private String piso;
     private String dimensoes;
-    private Short capacidade;
+    private Short capacidadeMin;
+    private Short capacidadeMax;
     private Boolean disponivel;
     private List<EsporteResponse> listaEsportes = new ArrayList<>();
     private LocalTime horaAbertura;
@@ -33,6 +35,7 @@ public class EspEsportivoCriacaoResponse {
     private LocalTime periodoLocacao;
     private Integer maxLocacaoDia;
     private String imagemBase64;
+    private List<Integer> diasFuncionamento;
 
     public EspEsportivoCriacaoResponse(EspacoEsportivo ee) {
         this.id = ee.getId();
@@ -41,7 +44,8 @@ public class EspEsportivoCriacaoResponse {
         this.localidade = ee.getLocalidade();
         this.piso = ee.getPiso();
         this.dimensoes = ee.getDimensoes();
-        this.capacidade = ee.getCapacidade();
+        this.capacidadeMin = ee.getCapacidadeMin();
+        this.capacidadeMax = ee.getCapacidadeMax();
         this.disponivel = ee.getDisponivel();
         this.horaAbertura = ee.getHoraAbertura();
         this.horaFechamento = ee.getHoraFechamento();
@@ -49,6 +53,10 @@ public class EspEsportivoCriacaoResponse {
         this.maxLocacaoDia = ee.getMaxLocacaoDia();
         this.imagemBase64 = Base64.getEncoder().encodeToString(ee.getImagemBase64());
         ee.getListaEsportes().forEach(esporte -> this.listaEsportes.add(new EsporteResponse(esporte)));
+
+        this.diasFuncionamento = Arrays.stream(ee.getDiasFuncionamento().split(","))
+                .map(Integer::parseInt)
+                .toList();
 
     }
 }
