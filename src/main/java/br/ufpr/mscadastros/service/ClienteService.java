@@ -1,5 +1,6 @@
 package br.ufpr.mscadastros.service;
 
+import br.ufpr.mscadastros.client.ApiGatewayClient;
 import br.ufpr.mscadastros.client.MsLocacoesClient;
 import br.ufpr.mscadastros.exceptions.ConflictException;
 import br.ufpr.mscadastros.exceptions.EntityNotFoundException;
@@ -33,14 +34,16 @@ public class ClienteService {
     private String urlAtivacaoContaCliente;
 
     private final MsLocacoesClient msLocacoesClient;
+    private final ApiGatewayClient apiGatewayClient;
 
 
 
-    public ClienteService(EmailService emailService, TokenService tokenService, ClienteRepository clienteRepository, MsLocacoesClient msLocacoesClient) {
+    public ClienteService(EmailService emailService, TokenService tokenService, ClienteRepository clienteRepository, MsLocacoesClient msLocacoesClient, ApiGatewayClient apiGatewayClient) {
         this.emailService = emailService;
         this.tokenService = tokenService;
         this.clienteRepository = clienteRepository;
         this.msLocacoesClient = msLocacoesClient;
+        this.apiGatewayClient = apiGatewayClient;
     }
 
     @Transactional
@@ -166,13 +169,13 @@ public class ClienteService {
     }
 
     public List<ClienteBuscaDetalhadaResponse> buscarDetalhesCliente() {
+        var listaClientes = clienteRepository.findAll();
         var estatisticasReservas = msLocacoesClient.buscarEstatisticasReserva();
+        var statusBloqueioContas = apiGatewayClient.buscarStatusBloqueioContas();
 
         var clienteBuscaDetalhadaList = new ArrayList<ClienteBuscaDetalhadaResponse>();
-        estatisticasReservas.forEach(estatistica -> {
-            var cliente = clienteRepository.findById(estatistica.getIdCliente());
-            cliente.ifPresent(c -> clienteBuscaDetalhadaList.add(new ClienteBuscaDetalhadaResponse(c, estatistica)));
-        });
+
+        listaClientes.forEach(cliente -> clienteBuscaDetalhadaList.add(new ClienteBuscaDetalhadaResponse(cliente, estatisticasReservas, statusBloqueioContas)));
 
         return clienteBuscaDetalhadaList;
     }
