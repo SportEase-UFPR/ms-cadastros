@@ -33,7 +33,7 @@ public class MsLocacoesClient {
     private HttpHeaders gerarCabecalho() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("AuthorizationApi", tokenService.gerarTokenMsCadastro());
+        headers.set("AuthorizationApi", tokenService.gerarTokenMs());
         return headers;
     }
 

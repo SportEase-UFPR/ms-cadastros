@@ -1,6 +1,5 @@
 package br.ufpr.mscadastros.client;
 
-import br.ufpr.mscadastros.model.dto.locacao.EstatisticasReservaResponse;
 import br.ufpr.mscadastros.model.dto.usuario.StatusBloqueioContaResponse;
 import br.ufpr.mscadastros.security.TokenService;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +33,7 @@ public class ApiGatewayClient {
     private HttpHeaders gerarCabecalho() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("AuthorizationApi", tokenService.gerarTokenMsCadastro());
+        headers.set("AuthorizationApi", tokenService.gerarTokenMs());
         return headers;
     }
 

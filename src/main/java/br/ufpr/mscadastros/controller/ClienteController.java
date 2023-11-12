@@ -97,13 +97,13 @@ public class ClienteController {
     @PostMapping("/buscar-lista-nomes")
     public ResponseEntity<List<NomeClienteResponse>> buscarNomesClientes(@RequestBody List<Long> request,
                                                                        @RequestHeader("AuthorizationApi") String token) {
-        tokenService.validarTokenApiMsLocacoes(token);
+        tokenService.validarTokenMs(token);
         return ResponseEntity.status(HttpStatus.OK).body(clienteService.buscarNomesClientes(request));
     }
 
     @GetMapping("/buscar-ids")
     public ResponseEntity<List<Long>> buscarIdsClientes(@RequestHeader("AuthorizationApi") String token) {
-        tokenService.validarTokenApiMsComunicacoes(token);
+        tokenService.validarTokenMs(token);
         return ResponseEntity.status(HttpStatus.OK).body(clienteService.buscarIdsClientes());
     }
 
