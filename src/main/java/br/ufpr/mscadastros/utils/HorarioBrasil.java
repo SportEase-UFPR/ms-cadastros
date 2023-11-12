@@ -1,4 +1,4 @@
-package br.ufpr.mscadastros.constants;
+package br.ufpr.mscadastros.utils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -10,5 +10,7 @@ public final class HorarioBrasil {
         //vazio...
     }
 
-    public static final LocalDateTime HORA_ATUAL = ZonedDateTime.now(ZoneOffset.ofHours(-3)).toLocalDateTime();
+    public static LocalDateTime buscarHoraAtual() {
+        return ZonedDateTime.now(ZoneOffset.ofHours(-3)).toLocalDateTime();
+    }
 }
