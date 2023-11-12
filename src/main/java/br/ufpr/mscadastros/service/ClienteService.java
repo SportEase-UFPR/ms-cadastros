@@ -54,6 +54,9 @@ public class ClienteService {
         if(Boolean.TRUE.equals(clienteRepository.existsByCpf(cliente.getCpf()))) {
             throw new ConflictException("Cpf já cadastrado");
         }
+        if(Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr()))) {
+            throw new ConflictException("Grr já cadastrado");
+        }
         //Criação do novo cliente
         Cliente novoCliente = new Cliente(cliente);
         clienteRepository.save(novoCliente);
@@ -84,6 +87,10 @@ public class ClienteService {
 
         if(Boolean.TRUE.equals(clienteRepository.existsByEmail(request.getEmail())) && !cliente.getEmail().equals(request.getEmail())) {
             throw new ConflictException("Email já cadastrado");
+        }
+
+        if(Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr())) && !cliente.getGrr().equals(request.getGrr())) {
+            throw new ConflictException("Grr já cadastrado");
         }
 
         //altera o nome, caso ele seja passado na requisição
