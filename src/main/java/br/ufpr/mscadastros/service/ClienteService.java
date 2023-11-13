@@ -98,7 +98,7 @@ public class ClienteService {
         }
 
         if(request.getAlunoUFPR()) {
-            if (Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr())) && !cliente.getGrr().equals(request.getGrr())) {
+            if (Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr())) && !request.getGrr().equals(cliente.getGrr())) {
                 throw new ConflictException("GRR já cadastrado");
             }
         }
