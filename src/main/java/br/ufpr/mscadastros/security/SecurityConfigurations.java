@@ -40,6 +40,10 @@ public class SecurityConfigurations {
                 .requestMatchers(HttpMethod.PUT, "/espacos-esportivos/atualizar-media-avaliacao/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/clientes/buscar-lista-nomes").permitAll()
                 .requestMatchers(HttpMethod.GET, "/clientes/buscar-ids").permitAll()
+                .requestMatchers(HttpMethod.GET, "/clientes/via-ms/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/buscar-emails-clientes/via-ms").permitAll()
+
+
                 .requestMatchers(HttpMethod.POST, "/espacos-esportivos/buscar-lista-ee-simplificado").permitAll()
                 .anyRequest().authenticated()
                 .and().addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class) //serve para chamar o filtro (SecurityFilter) antes do filtro do spring

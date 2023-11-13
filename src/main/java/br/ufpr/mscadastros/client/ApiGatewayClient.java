@@ -17,10 +17,8 @@ import java.util.List;
 @Service
 public class ApiGatewayClient {
 
-    @Value("${url.apigateway.usuario}")
-    private String urlApiGatewayUsuario;
-
-    public static final String AUTHORIZATION_USER = "AuthorizationUser";
+    @Value("${url.api.gateway}")
+    private String urlApiGateway;
 
     private final RestTemplate restTemplate;
     private final TokenService tokenService;
@@ -38,13 +36,13 @@ public class ApiGatewayClient {
     }
 
     public void excluirUsuarioPorId(Long idUsuario) {
-        String url = urlApiGatewayUsuario + idUsuario;
+        String url = urlApiGateway + "/usuarios/" + idUsuario;
         HttpHeaders headers = gerarCabecalho();
         restTemplate.exchange(url, HttpMethod.DELETE, new HttpEntity<>(headers), Object.class);
     }
 
     public List<StatusBloqueioContaResponse> buscarStatusBloqueioContas() {
-        String url = urlApiGatewayUsuario + "/buscar-status-bloqueio-contas";
+        String url = urlApiGateway + "/usuarios/buscar-status-bloqueio-contas";
         HttpHeaders headers = gerarCabecalho();
         var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<List<Object>>() {}).getBody();
 

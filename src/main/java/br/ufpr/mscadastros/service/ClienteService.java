@@ -1,7 +1,9 @@
 package br.ufpr.mscadastros.service;
 
 import br.ufpr.mscadastros.client.ApiGatewayClient;
+import br.ufpr.mscadastros.client.MsComunicacoesClient;
 import br.ufpr.mscadastros.client.MsLocacoesClient;
+import br.ufpr.mscadastros.emails.TemplateEmails;
 import br.ufpr.mscadastros.exceptions.ConflictException;
 import br.ufpr.mscadastros.exceptions.EntityNotFoundException;
 import br.ufpr.mscadastros.model.dto.cliente.*;
@@ -23,7 +25,6 @@ import java.util.List;
 @Service
 public class ClienteService {
     public static final String CLIENTE_NAO_ENCONTRADO = "cliente não encontrado";
-    private final EmailService emailService;
     private final TokenService tokenService;
     private final ClienteRepository clienteRepository;
 
@@ -35,15 +36,16 @@ public class ClienteService {
 
     private final MsLocacoesClient msLocacoesClient;
     private final ApiGatewayClient apiGatewayClient;
+    private final MsComunicacoesClient msComunicacoesClient;
 
 
 
-    public ClienteService(EmailService emailService, TokenService tokenService, ClienteRepository clienteRepository, MsLocacoesClient msLocacoesClient, ApiGatewayClient apiGatewayClient) {
-        this.emailService = emailService;
+    public ClienteService(TokenService tokenService, ClienteRepository clienteRepository, MsLocacoesClient msLocacoesClient, ApiGatewayClient apiGatewayClient, MsComunicacoesClient msComunicacoesClient) {
         this.tokenService = tokenService;
         this.clienteRepository = clienteRepository;
         this.msLocacoesClient = msLocacoesClient;
         this.apiGatewayClient = apiGatewayClient;
+        this.msComunicacoesClient = msComunicacoesClient;
     }
 
     @Transactional
@@ -65,7 +67,8 @@ public class ClienteService {
         String tokenAtivacaoConta = tokenService.gerarTokenComEmailSemExpiracao(cliente.getIdUsuario().toString(), NivelAcesso.ROLE_CLIENTE, cliente.getEmail());
 
         //Envio de email de ativação de conta
-        emailService.enviarEmailAtivacaoConta(cliente.getEmail(), cliente.getNome(), tokenAtivacaoConta, urlAtivacaoContaCliente);
+        msComunicacoesClient.enviarEmail(TemplateEmails.emailAtivacaoConta(cliente.getEmail(),
+                cliente.getNome(), tokenAtivacaoConta, urlAtivacaoContaCliente));
 
         return new ClienteCriacaoResponse(novoCliente);
     }
@@ -114,7 +117,9 @@ public class ClienteService {
         if(StringUtils.isNotBlank(request.getEmail()) && !cliente.getEmail().equals(request.getEmail())) {
 
             String tokenAlteracaoEmail = tokenService.gerarTokenComEmailSemExpiracao(idUsuario, NivelAcesso.ROLE_CLIENTE, request.getEmail());
-            emailService.enviarEmailConfirmacaoNovoEmail(request.getEmail(), cliente.getNome(), tokenAlteracaoEmail, urlAlteracaoEmailCliente);
+            msComunicacoesClient.enviarEmail(TemplateEmails.emailConfirmarNovoEmail(request.getEmail(),
+                    cliente.getNome(), tokenAlteracaoEmail, urlAlteracaoEmailCliente));
+
 
             return ClienteAlteracaoResponse.builder()
                     .mensagem("Dados do cliente alterado e mensagem enviada para " + request.getEmail())

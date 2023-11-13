@@ -1,5 +1,7 @@
 package br.ufpr.mscadastros.service;
 
+import br.ufpr.mscadastros.client.MsComunicacoesClient;
+import br.ufpr.mscadastros.emails.TemplateEmails;
 import br.ufpr.mscadastros.model.dto.usuario.*;
 import br.ufpr.mscadastros.repository.AdministradorRepository;
 import br.ufpr.mscadastros.repository.ClienteRepository;
@@ -18,15 +20,15 @@ public class UsuarioService {
 
     public static final String USUARIO_NAO_ENCONTRADO = "Usuário não encontrado";
     private final TokenService tokenService;
-    private final EmailService emailService;
     private final ClienteRepository clienteRepository;
     private final AdministradorRepository admRepository;
+    private final MsComunicacoesClient msComunicacoesClient;
 
-    public UsuarioService(TokenService tokenService, EmailService emailService, ClienteRepository clienteRepository, AdministradorRepository admRepository) {
+    public UsuarioService(TokenService tokenService, ClienteRepository clienteRepository, AdministradorRepository admRepository, MsComunicacoesClient msComunicacoesClient) {
         this.tokenService = tokenService;
-        this.emailService = emailService;
         this.clienteRepository = clienteRepository;
         this.admRepository = admRepository;
+        this.msComunicacoesClient = msComunicacoesClient;
     }
 
 
@@ -40,11 +42,12 @@ public class UsuarioService {
 
         if(cliente != null) {
             String tokenRecuperacaoSenha = tokenService.gerarTokenComEmailSemExpiracao(cliente.getIdUsuario().toString(), email);
-            emailService.enviarEmailRecuperacaoSenha(email, cliente.getNome(), tokenRecuperacaoSenha, urlRecuperacaoSenhaCliente);
+            msComunicacoesClient.enviarEmail(TemplateEmails.emailRecuperacaoSenha(email, cliente.getNome(),
+                    tokenRecuperacaoSenha, urlRecuperacaoSenhaCliente));
         } else {
             String tokenRecuperacaoSenha = tokenService.gerarTokenComEmailSemExpiracao(adm.getIdUsuario().toString(), email);
-            emailService.enviarEmailRecuperacaoSenha(email, adm.getNome(), tokenRecuperacaoSenha, urlRecuperacaoSenhaAdm);
-
+            msComunicacoesClient.enviarEmail(TemplateEmails.emailRecuperacaoSenha(email, adm.getNome(),
+                    tokenRecuperacaoSenha, urlRecuperacaoSenhaAdm));
         }
 
         return RecuperarSenhaResponse.builder()
