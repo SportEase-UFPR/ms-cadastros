@@ -1,6 +1,8 @@
 package br.ufpr.mscadastros.service;
 
 import br.ufpr.mscadastros.client.ApiGatewayClient;
+import br.ufpr.mscadastros.client.MsComunicacoesClient;
+import br.ufpr.mscadastros.emails.TemplateEmails;
 import br.ufpr.mscadastros.exceptions.ConflictException;
 import br.ufpr.mscadastros.exceptions.EntityNotFoundException;
 import br.ufpr.mscadastros.model.dto.adm.*;
@@ -24,7 +26,7 @@ public class AdmService {
     public static final String ADM_NAO_ENCONTRADO = "Adm não encontrado";
     private final TokenService tokenService;
     private final AdministradorRepository administradorRepository;
-    private final EmailService emailService;
+    private final MsComunicacoesClient msComunicacoesClient;
 
     private final ApiGatewayClient apiGatewayClient;
 
@@ -38,10 +40,10 @@ public class AdmService {
     private EntityManager entityManager;
 
 
-    public AdmService(TokenService tokenService, AdministradorRepository administradorRepository, EmailService emailService, ApiGatewayClient apiGatewayClient) {
+    public AdmService(TokenService tokenService, AdministradorRepository administradorRepository, MsComunicacoesClient msComunicacoesClient, ApiGatewayClient apiGatewayClient) {
         this.tokenService = tokenService;
         this.administradorRepository = administradorRepository;
-        this.emailService = emailService;
+        this.msComunicacoesClient = msComunicacoesClient;
         this.apiGatewayClient = apiGatewayClient;
     }
 
@@ -56,7 +58,8 @@ public class AdmService {
                 NivelAcesso.ROLE_ADM, request.getNovoEmail());
 
         //enviar email
-        emailService.enviarEmailConfirmacaoNovoEmail(request.getNovoEmail(), adm.getNome(), tokenAlteracaoEmail, urlAlteracaoEmailAdm);
+        msComunicacoesClient.enviarEmail(TemplateEmails.emailConfirmarNovoEmail(request.getNovoEmail(),
+                        adm.getNome(), tokenAlteracaoEmail, urlAlteracaoEmailAdm));
 
         return AdmAlterarEmailSolicitacaoResponse.builder()
                 .mensagem("Mensagem de alteração de email enviada para " + request.getNovoEmail())
@@ -114,7 +117,8 @@ public class AdmService {
         String tokenAtivacaoConta = tokenService.gerarTokenComEmailSemExpiracao(adm.getIdUsuario().toString(), NivelAcesso.ROLE_ADM, adm.getEmail());
 
         //Envio de email de ativação de conta
-        emailService.enviarEmailAtivacaoConta(adm.getEmail(), adm.getNome(), tokenAtivacaoConta, urlAtivacaoContaAdm);
+        msComunicacoesClient.enviarEmail(TemplateEmails.emailAtivacaoConta(adm.getEmail(),
+                adm.getNome(), tokenAtivacaoConta, urlAtivacaoContaAdm));
 
         return new AdmCriacaoResponse(novoAdm);
     }
@@ -174,7 +178,8 @@ public class AdmService {
         //Para alterar o email, é necessário validar ele, clicando no link enviado para o novo email
         if (StringUtils.isNotBlank(request.getEmail()) && !adm.getEmail().equals(request.getEmail())) {
             String tokenAlteracaoEmail = tokenService.gerarTokenComEmailSemExpiracao(idUsuario, NivelAcesso.ROLE_ADM, request.getEmail());
-            emailService.enviarEmailConfirmacaoNovoEmail(request.getEmail(), adm.getNome(), tokenAlteracaoEmail, urlAlteracaoEmailAdm);
+            msComunicacoesClient.enviarEmail(TemplateEmails.emailConfirmarNovoEmail(request.getEmail(),
+                    adm.getNome(), tokenAlteracaoEmail, urlAlteracaoEmailAdm));
 
             return AdmAlteracaoResponse.builder()
                     .idAdm(adm.getId())

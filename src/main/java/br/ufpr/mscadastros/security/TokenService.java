@@ -17,40 +17,28 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
 
-    @Value("${api.security.token.user.secret}")
+    @Value("${user.secret}")
     private String userSecret;
 
-    @Value("${api.security.token.apigateway.secret}")
+    @Value("${api.gateway.secret}")
     private String apiGatewaySecret;
 
-    @Value("${api.security.token.mscadastro.secret}")
-    private String msCadastroSecret;
+    @Value("${ms.secret}")
+    private String msSecret;
+
+    @Value("${user.issuer}")
+    private String userIssuer;
 
     @Value("${api.gateway.issuer}")
     private String apiGatewayIssuer;
 
-    @Value("${api.user.issuer}")
-    private String apiUserIssuer;
-
-    @Value("${api.mscadastro.issuer}")
-    private String msCadastroIssuer;
-
-    @Value("${api.mslocacoes.issuer}")
-    private String msLocacoesIssuer;
-
-    @Value("${api.security.token.mslocacoes.secret}")
-    private String msLocacoesSecret;
-
-    @Value("${api.mscomunicacoes.issuer}")
-    private String msComunicacoesIssuer;
-
-    @Value("${api.security.token.mscomunicacoes.secret}")
-    private String msComunicacoesSecret;
+    @Value("${ms.issuer}")
+    private String msIssuer;
 
     public String gerarTokenComEmailSemExpiracao(String idUsuario, NivelAcesso nivelAcesso, String email) {
         var algoritmo = Algorithm.HMAC256(userSecret);
         return JWT.create()
-                .withIssuer(apiUserIssuer)
+                .withIssuer(userIssuer)
                 .withSubject(idUsuario)
                 .withClaim("userProfile", nivelAcesso.toString())
                 .withClaim("email", email)
@@ -60,34 +48,46 @@ public class TokenService {
     public String gerarTokenComEmailSemExpiracao(String idUsuario, String email) {
         var algoritmo = Algorithm.HMAC256(userSecret);
         return JWT.create()
-                .withIssuer(apiUserIssuer)
+                .withIssuer(userIssuer)
                 .withSubject(idUsuario)
                 .withClaim("email", email)
                 .sign(algoritmo);
     }
 
-    public void validarToken(String tokenJWT) {
-        var tokenFormatado = removerPrefixoToken(tokenJWT);
+    public String gerarTokenMs() {
+        var algoritmo = Algorithm.HMAC256(msSecret);
+        return JWT.create()
+                .withIssuer(msIssuer)
+                .withSubject(msIssuer)
+                .withExpiresAt(dataExpiracao(20)) //data da expiração
+                .sign(algoritmo); //assinatura
+    }
+
+    public void validarTokenApiGateway(String tokenJWT) {
         try {
             var algoritmo = Algorithm.HMAC256(apiGatewaySecret);
             JWT.require(algoritmo)
                     .withIssuer(apiGatewayIssuer)
                     .build()
-                    .verify(tokenFormatado);
+                    .verify(tokenJWT);
         } catch (JWTVerificationException ex) {
             log.error(ex.getMessage());
             throw new TokenInvalidoException("Token JWT inválido ou expirado");
         }
     }
 
-    public String gerarTokenMsCadastro() {
-        var algoritmo = Algorithm.HMAC256(msCadastroSecret);
-        return JWT.create()
-                .withIssuer(msCadastroIssuer)
-                .withSubject(msCadastroIssuer)
-                .withExpiresAt(dataExpiracao(20)) //data da expiração
-                .sign(algoritmo); //assinatura
-
+    public void validarTokenMs(String tokenApi) {
+        var tokenFormatado = removerPrefixoToken(tokenApi);
+        try {
+            var algoritmo = Algorithm.HMAC256(msSecret);
+            JWT.require(algoritmo)
+                    .withIssuer(msIssuer)
+                    .build()
+                    .verify(tokenFormatado);
+        } catch (JWTVerificationException ex) {
+            log.error(ex.getMessage());
+            throw new TokenInvalidoException("Token JWT inválido ou expirado");
+        }
     }
 
     public String removerPrefixoToken(String token) {
@@ -108,31 +108,4 @@ public class TokenService {
         return LocalDateTime.now().plusMinutes(minutes).toInstant(ZoneOffset.of("-03:00"));
     }
 
-    public void validarTokenApiMsLocacoes(String tokenApi) {
-        var tokenFormatado = removerPrefixoToken(tokenApi);
-        try {
-            var algoritmo = Algorithm.HMAC256(msLocacoesSecret);
-            JWT.require(algoritmo)
-                    .withIssuer(msLocacoesIssuer)
-                    .build()
-                    .verify(tokenFormatado);
-        } catch (JWTVerificationException ex) {
-            log.error(ex.getMessage());
-            throw new TokenInvalidoException("Token JWT inválido ou expirado");
-        }
-    }
-
-    public void validarTokenApiMsComunicacoes(String tokenApi) {
-        var tokenFormatado = removerPrefixoToken(tokenApi);
-        try {
-            var algoritmo = Algorithm.HMAC256(msComunicacoesSecret);
-            JWT.require(algoritmo)
-                    .withIssuer(msComunicacoesIssuer)
-                    .build()
-                    .verify(tokenFormatado);
-        } catch (JWTVerificationException ex) {
-            log.error(ex.getMessage());
-            throw new TokenInvalidoException("Token JWT inválido ou expirado");
-        }
-    }
 }

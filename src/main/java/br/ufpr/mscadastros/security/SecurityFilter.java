@@ -28,7 +28,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         var tokenJWT = recuperarToken(request);
 
         if(tokenJWT != null) {
-            tokenService.validarToken(tokenJWT); //valida o token
+            tokenService.validarTokenApiGateway(tokenJWT); //valida o token
             var authentication = new UsernamePasswordAuthenticationToken(tokenJWT, null, null);
             SecurityContextHolder.getContext().setAuthentication(authentication); //considera o usuário logado para essa requisição
         }
