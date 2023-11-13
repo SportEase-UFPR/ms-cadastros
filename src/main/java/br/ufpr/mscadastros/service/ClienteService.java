@@ -57,7 +57,7 @@ public class ClienteService {
             throw new ConflictException("CPF já cadastrado");
         }
 
-        if(cliente.getGrr() != null) {
+        if(cliente.getAlunoUFPR()) {
             if (Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr()))) {
                 throw new ConflictException("GRR já cadastrado");
             }
@@ -97,7 +97,7 @@ public class ClienteService {
             throw new ConflictException("E-mail já cadastrado");
         }
 
-        if(cliente.getGrr() != null) {
+        if(cliente.getAlunoUFPR()) {
             if (Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr())) && !cliente.getGrr().equals(request.getGrr())) {
                 throw new ConflictException("GRR já cadastrado");
             }
