@@ -96,11 +96,9 @@ public class ClienteService {
         if(Boolean.TRUE.equals(clienteRepository.existsByEmail(request.getEmail())) && !cliente.getEmail().equals(request.getEmail())) {
             throw new ConflictException("E-mail já cadastrado");
         }
-
-        if(cliente.getAlunoUFPR()) {
-            if (Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr())) && !cliente.getGrr().equals(request.getGrr())) {
-                throw new ConflictException("GRR já cadastrado");
-            }
+        
+        if (Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr())) && !cliente.getGrr().equals(request.getGrr())) {
+            throw new ConflictException("GRR já cadastrado");
         }
 
         //altera o nome, caso ele seja passado na requisição
