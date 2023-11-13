@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 @Service
@@ -99,7 +98,7 @@ public class ClienteService {
         }
 
         if(request.getAlunoUFPR()) {
-            if (Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr())) && !Objects.equals(request.getGrr(), cliente.getGrr())) {
+            if (Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr())) && !(request.getGrr() == cliente.getGrr())) {
                 throw new ConflictException("GRR já cadastrado");
             }
         }
