@@ -51,14 +51,17 @@ public class ClienteService {
     @Transactional
     public ClienteCriacaoResponse criarCliente(ClienteCriacaoRequest cliente) {
         if(Boolean.TRUE.equals(clienteRepository.existsByEmail(cliente.getEmail()))) {
-            throw new ConflictException("Email já cadastrado");
+            throw new ConflictException("E-mail já cadastrado");
         }
         if(Boolean.TRUE.equals(clienteRepository.existsByCpf(cliente.getCpf()))) {
-            throw new ConflictException("Cpf já cadastrado");
+            throw new ConflictException("CPF já cadastrado");
         }
-        if(Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr()))) {
-            throw new ConflictException("Grr já cadastrado");
+
+        if (Boolean.TRUE.equals(clienteRepository.existsByGrrNotNull(cliente.getGrr()))) {
+            throw new ConflictException("GRR já cadastrado");
         }
+
+
         //Criação do novo cliente
         Cliente novoCliente = new Cliente(cliente);
         clienteRepository.save(novoCliente);
@@ -89,11 +92,11 @@ public class ClienteService {
                 .orElseThrow(() -> new EntityNotFoundException(CLIENTE_NAO_ENCONTRADO));
 
         if(Boolean.TRUE.equals(clienteRepository.existsByEmail(request.getEmail())) && !cliente.getEmail().equals(request.getEmail())) {
-            throw new ConflictException("Email já cadastrado");
+            throw new ConflictException("E-mail já cadastrado");
         }
 
-        if(Boolean.TRUE.equals(clienteRepository.existsByGrr(cliente.getGrr())) && !cliente.getGrr().equals(request.getGrr())) {
-            throw new ConflictException("Grr já cadastrado");
+        if(Boolean.TRUE.equals(clienteRepository.existsByGrrNotNull(cliente.getGrr())) && !cliente.getGrr().equals(request.getGrr())) {
+            throw new ConflictException("GRR já cadastrado");
         }
 
         //altera o nome, caso ele seja passado na requisição
