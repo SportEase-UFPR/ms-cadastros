@@ -36,7 +36,7 @@ public class MsLocacoesClient {
     }
 
     public List<EstatisticasReservaResponse> buscarEstatisticasReserva() {
-        String url = urlMsLocacoes + "locacoes/estatisticas-reserva";
+        String url = urlMsLocacoes + "/locacoes/estatisticas-reserva";
         HttpHeaders headers = gerarCabecalho();
         var response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<List<Object>>() {}).getBody();
 
