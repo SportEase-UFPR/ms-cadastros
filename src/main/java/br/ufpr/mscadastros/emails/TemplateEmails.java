@@ -56,7 +56,7 @@ public class TemplateEmails {
         var linkAtualizacaoEmail = urlBase + "?token=" + tokenAlteracaoEmail;
         var assunto = "SportEase - Alteração de email";
         var mensagem = """
-                <html>
+                             <html>
                 <head>
                   <style>
                     .cabecalho {
