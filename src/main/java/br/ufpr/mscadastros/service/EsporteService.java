@@ -1,11 +1,13 @@
 package br.ufpr.mscadastros.service;
 
+import br.ufpr.mscadastros.exceptions.BussinessException;
 import br.ufpr.mscadastros.exceptions.ConflictException;
 import br.ufpr.mscadastros.exceptions.EntityNotFoundException;
 import br.ufpr.mscadastros.model.dto.esporte.EsporteExclusaoResponse;
 import br.ufpr.mscadastros.model.dto.esporte.EsporteRequest;
 import br.ufpr.mscadastros.model.dto.esporte.EsporteResponse;
 import br.ufpr.mscadastros.model.entity.Esporte;
+import br.ufpr.mscadastros.repository.EspacoEsportivoRepository;
 import br.ufpr.mscadastros.repository.EsporteRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,16 +19,18 @@ import java.util.Optional;
 public class EsporteService {
 
     private final EsporteRepository esporteRepository;
+    private final EspacoEsportivoRepository espacoEsportivoRepository;
 
-    public EsporteService(EsporteRepository esporteRepository) {
+    public EsporteService(EsporteRepository esporteRepository, EspacoEsportivoRepository espacoEsportivoRepository) {
         this.esporteRepository = esporteRepository;
+        this.espacoEsportivoRepository = espacoEsportivoRepository;
     }
 
     public EsporteResponse criarEsporte(EsporteRequest esporteRequest) {
         //Verificando se o esporte já existe
         Optional<Esporte> esporte = esporteRepository.findByNome(esporteRequest.getNome());
 
-        if(esporte.isPresent()) {
+        if (esporte.isPresent()) {
             throw new ConflictException("Esporte já cadastrado");
         }
 
@@ -39,7 +43,7 @@ public class EsporteService {
     public List<EsporteResponse> listarEsportes() {
         List<Esporte> listaEsportes = esporteRepository.findAll();
 
-        if(listaEsportes.isEmpty()){
+        if (listaEsportes.isEmpty()) {
             throw new EntityNotFoundException("Não há esportes cadastrados");
         }
 
@@ -49,8 +53,16 @@ public class EsporteService {
     }
 
     public EsporteExclusaoResponse excluirEsporte(Long idEsporte) {
-        Esporte esporte = esporteRepository.findById(idEsporte)
+        var esporte = esporteRepository.findById(idEsporte)
                 .orElseThrow(() -> new EntityNotFoundException("Esporte não cadastrado"));
+
+        //Verificar se existe algum espaço esportivo relacionado ao esporte
+        var espacosEsportivos = espacoEsportivoRepository.findAll();
+        espacosEsportivos.forEach(ee -> ee.getListaEsportes().forEach(esp -> {
+            if(esp == esporte) {
+                throw new BussinessException("Não é possível excluir esse esporte pois o espaço esportivo '" + ee.getNome() + "' possui vínculo com esse esporte");
+            }
+        }));
 
         //Excluir esportes vinculados aos espaços esportivos
         esporteRepository.excluirEspacoEsportivoEsporte(idEsporte);
