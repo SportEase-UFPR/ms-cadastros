@@ -60,7 +60,7 @@ public class EsporteService {
         var espacosEsportivos = espacoEsportivoRepository.findAll();
         espacosEsportivos.forEach(ee -> ee.getListaEsportes().forEach(esp -> {
             if(esp == esporte) {
-                throw new BussinessException("Não é possível excluir esse esporte pois o espaço esportivo '" + ee.getNome() + "' possui vínculo com esse esporte");
+                throw new BussinessException("Não é possível excluir esse esporte, pois ele possui vínculo com outros espaços esportivos");
             }
         }));
 
