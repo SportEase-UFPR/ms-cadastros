@@ -1,6 +1,7 @@
 package br.ufpr.mscadastros.client;
 
 import br.ufpr.mscadastros.model.dto.email.CriacaoEmailRequest;
+import br.ufpr.mscadastros.model.dto.notificacao.CriacaoNotificacaoRequest;
 import br.ufpr.mscadastros.security.TokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -35,6 +36,13 @@ public class MsComunicacoesClient {
         String url = urlMsComunicacoes + "/email/via-ms";
         HttpHeaders headers = gerarCabecalho();
         restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(request, headers), Object.class);
+    }
+
+    public void enviarNotificacao(CriacaoNotificacaoRequest request) {
+        String url = urlMsComunicacoes + "/notificacoes";
+        HttpHeaders headers = gerarCabecalho();
+
+        restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(request, headers), Object.class).getBody();
     }
 
 }

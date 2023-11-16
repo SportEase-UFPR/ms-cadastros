@@ -1,5 +1,8 @@
 package br.ufpr.mscadastros.service;
 
+import br.ufpr.mscadastros.client.MsComunicacoesClient;
+import br.ufpr.mscadastros.client.MsLocacoesClient;
+import br.ufpr.mscadastros.emails.TemplateNotificacoes;
 import br.ufpr.mscadastros.exceptions.EntityNotFoundException;
 import br.ufpr.mscadastros.model.dto.espaco_esportivo.*;
 import br.ufpr.mscadastros.model.dto.locacao.InformacoesComplementaresLocacaoRequest;
@@ -10,6 +13,7 @@ import br.ufpr.mscadastros.repository.ClienteRepository;
 import br.ufpr.mscadastros.repository.EspacoEsportivoRepository;
 import br.ufpr.mscadastros.repository.EsporteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +24,16 @@ public class EspacoEsportivoService {
     public static final String ESPACO_ESPORTIVO_NAO_CADASTRADO = "Espaço esportivo não cadastrado";
     private final EspacoEsportivoRepository repository;
     private final ClienteRepository clienteRepository;
-
     private final EsporteRepository esporteRepository;
+    private final MsLocacoesClient msLocacoesClient;
+    private final MsComunicacoesClient msComunicacoesClient;
 
-    public EspacoEsportivoService(EspacoEsportivoRepository repository, ClienteRepository clienteRepository, EsporteRepository esporteRepository) {
+    public EspacoEsportivoService(EspacoEsportivoRepository repository, ClienteRepository clienteRepository, EsporteRepository esporteRepository, MsLocacoesClient msLocacoesClient, MsComunicacoesClient msComunicacoesClient) {
         this.repository = repository;
         this.clienteRepository = clienteRepository;
         this.esporteRepository = esporteRepository;
+        this.msLocacoesClient = msLocacoesClient;
+        this.msComunicacoesClient = msComunicacoesClient;
     }
 
     public EspEsportivoCriacaoResponse criarEspacoEsportivo(EspEsportivoCriacaoRequest request) {
@@ -75,11 +82,12 @@ public class EspacoEsportivoService {
     }
 
 
+    @Transactional
     public EspEsportivoAlteracaoResponse editarEspacoEsportivo(Long espEsportivoId, EspEsportivoAlteracaoRequest request) {
         //Recuperar Espaço esportivo
         EspacoEsportivo ee = repository.findById(espEsportivoId)
                 .orElseThrow(() -> new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO));
-
+        var disponivel = ee.getDisponivel();
         ee.editarDados(request);
 
         //Buscar esportes, validar se eles existem e vinculá-los ao espaço esportivo a ser editado
@@ -94,6 +102,15 @@ public class EspacoEsportivoService {
         }
 
         ee.validarEspacoEsportivo();
+
+        //caso o espaço esportivo ficar indisponível ou disponível, os clientes devem ser notificados
+        if(Boolean.TRUE.equals(disponivel) && Boolean.FALSE.equals(ee.getDisponivel())) { //estava disponível e ficou indisponível
+            msLocacoesClient.encerrarReservasFuturas(ee.getId());
+            msComunicacoesClient.enviarNotificacao(TemplateNotificacoes.notificacaoEEFicouIndisponivel(ee));
+            //notificar a todos que o espaço esportivo ficou indisponível
+        }else if (Boolean.FALSE.equals(disponivel) && Boolean.TRUE.equals(ee.getDisponivel())) { //estava indisponível e ficou disponível
+            msComunicacoesClient.enviarNotificacao(TemplateNotificacoes.notificacaoEEFicouDisponivel(ee));
+        }
 
         repository.save(ee);
 

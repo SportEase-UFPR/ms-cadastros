@@ -46,4 +46,10 @@ public class MsLocacoesClient {
 
         return listaEstatisticas;
     }
+
+    public void encerrarReservasFuturas(Long idEspacoEsportivo) {
+        String url = urlMsLocacoes + "/locacoes/encerrar-reservas-futuras/" + idEspacoEsportivo;
+        HttpHeaders headers = gerarCabecalho();
+        restTemplate.exchange(url, HttpMethod.PUT, new HttpEntity<>(headers), Object.class);
+    }
 }
