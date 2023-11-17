@@ -24,10 +24,10 @@ public class TemplateNotificacoes {
     }
 
     public static CriacaoNotificacaoRequest notificacaoEEFicouDisponivel(EspacoEsportivo espacoEsportivo) {
-        var titulo = "O ESPAÇO ESPORTIVO '" + espacoEsportivo.getNome().toUpperCase() + "' FOI ATIVADO";
+        var titulo = "O ESPAÇO ESPORTIVO '" + espacoEsportivo.getNome().toUpperCase() + "' ESTÁ DISPONÍVEL";
 
         var conteudo = """
-                    O espaço esportivo '%s' foi ativado. Portanto agora é possível solicitar reservas para ele.
+                    O espaço esportivo '%s' foi ativado. Agora você já pode solicitar reservas para ele.
                 """
                 .formatted(espacoEsportivo.getNome());
 
