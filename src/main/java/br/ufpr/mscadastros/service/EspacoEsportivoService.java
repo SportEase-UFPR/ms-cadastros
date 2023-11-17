@@ -37,7 +37,7 @@ public class EspacoEsportivoService {
     }
 
     public EspEsportivoCriacaoResponse criarEspacoEsportivo(EspEsportivoCriacaoRequest request) {
-         //Criação de um novo espaço esportivo
+        //Criação de um novo espaço esportivo
         EspacoEsportivo novoEE = new EspacoEsportivo(request);
 
         //Buscar esportes, validar se eles existem e vinculá-los ao novo espaço esportivo
@@ -55,6 +55,8 @@ public class EspacoEsportivoService {
 
     public List<EspEsportivoBuscaResponse> listarEspacosEsportivos() {
         List<EspacoEsportivo> listaEspacosEsportivos = repository.findAll();
+        listaEspacosEsportivos.removeIf(EspacoEsportivo::getExcluido);
+
         if (listaEspacosEsportivos.isEmpty()) {
             throw new EntityNotFoundException("Não há espaços esportivos cadastrados");
         }
@@ -76,7 +78,13 @@ public class EspacoEsportivoService {
                 .orElseThrow(() -> new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO));
 
         repository.excluirEspacoEsportivoEsporte(ee.getId());
-        repository.delete(ee);
+        ee.setExcluido(true);
+
+        repository.save(ee);
+
+        //notificar clientes e encerrar reservas
+        msLocacoesClient.encerrarReservasFuturas(ee.getId());
+        msComunicacoesClient.enviarNotificacao(TemplateNotificacoes.notificacaoEEFicouIndisponivel(ee));
 
         return EspEsportivoExclusaoResponse.builder().msg("Espaço esportivo excluído com sucesso").build();
     }
@@ -87,11 +95,16 @@ public class EspacoEsportivoService {
         //Recuperar Espaço esportivo
         EspacoEsportivo ee = repository.findById(espEsportivoId)
                 .orElseThrow(() -> new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO));
+
+        if (ee.getExcluido()) {
+            throw new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO);
+        }
+
         var disponivel = ee.getDisponivel();
         ee.editarDados(request);
 
         //Buscar esportes, validar se eles existem e vinculá-los ao espaço esportivo a ser editado
-        if(!request.getListaEsportes().isEmpty()) {
+        if (!request.getListaEsportes().isEmpty()) {
             ee.setListaEsportes(new ArrayList<>());
 
             request.getListaEsportes().forEach(esporte -> {
@@ -104,11 +117,11 @@ public class EspacoEsportivoService {
         ee.validarEspacoEsportivo();
 
         //caso o espaço esportivo ficar indisponível ou disponível, os clientes devem ser notificados
-        if(Boolean.TRUE.equals(disponivel) && Boolean.FALSE.equals(ee.getDisponivel())) { //estava disponível e ficou indisponível
+        if (Boolean.TRUE.equals(disponivel) && Boolean.FALSE.equals(ee.getDisponivel())) { //estava disponível e ficou indisponível
             msLocacoesClient.encerrarReservasFuturas(ee.getId());
             msComunicacoesClient.enviarNotificacao(TemplateNotificacoes.notificacaoEEFicouIndisponivel(ee));
             //notificar a todos que o espaço esportivo ficou indisponível
-        }else if (Boolean.FALSE.equals(disponivel) && Boolean.TRUE.equals(ee.getDisponivel())) { //estava indisponível e ficou disponível
+        } else if (Boolean.FALSE.equals(disponivel) && Boolean.TRUE.equals(ee.getDisponivel())) { //estava indisponível e ficou disponível
             msComunicacoesClient.enviarNotificacao(TemplateNotificacoes.notificacaoEEFicouDisponivel(ee));
         }
 
@@ -123,7 +136,8 @@ public class EspacoEsportivoService {
             throw new EntityNotFoundException("Não há espaços esportivos cadastrados");
         }
 
-        //remover espaços esportivos indisponíveis
+        //remover espaços esportivos indisponíveis e excluidos
+        listaEspacosEsportivos.removeIf(EspacoEsportivo::getExcluido);
         listaEspacosEsportivos.removeIf(espacoEsportivo -> !espacoEsportivo.getDisponivel());
 
         List<EspEsportivoReservaResponse> response = new ArrayList<>();
@@ -138,7 +152,7 @@ public class EspacoEsportivoService {
             var espEsport = repository.findById(infCReq.getIdEspacoEsportivo()).orElse(null);
             var cliente = clienteRepository.findById(infCReq.getIdCliente()).orElse(null);
 
-            if(espEsport != null && cliente != null) {
+            if (espEsport != null && cliente != null) {
                 response.add(new InformacoesComplementaresLocacaoResponse(espEsport, cliente, infCReq.getIdLocacao()));
             }
         });
@@ -148,9 +162,13 @@ public class EspacoEsportivoService {
 
     public Void atualizarMediaAvaliacaoEspacoEsportivo(Long idEspacoEsportivo, AtualizarMediaAvaliacaoEERequest request) {
         var espacoEsportivo = repository.findById(idEspacoEsportivo)
-                .orElseThrow(() -> new EntityNotFoundException("Espaço esportivo não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO));
 
-        if(espacoEsportivo.getContagemAvaliacoes() == null || espacoEsportivo.getContagemAvaliacoes() == 0) {
+        if (espacoEsportivo.getExcluido()) {
+            throw new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO);
+        }
+
+        if (espacoEsportivo.getContagemAvaliacoes() == null || espacoEsportivo.getContagemAvaliacoes() == 0) {
             espacoEsportivo.setMediaAvaliacao(Double.valueOf(request.getAvaliacao()));
             espacoEsportivo.setContagemAvaliacoes(1);
         } else {
@@ -174,5 +192,10 @@ public class EspacoEsportivoService {
             espacoEsportivo.ifPresent(ee -> response.add(new EspacoEsportivoSimplificado(ee)));
         });
         return response;
+    }
+
+    public Boolean existeEEPorId(Long id) {
+        var ee = repository.findById(id);
+        return ee.filter(espacoEsportivo -> !espacoEsportivo.getExcluido()).isPresent();
     }
 }

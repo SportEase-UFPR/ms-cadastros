@@ -73,6 +73,8 @@ public class EspacoEsportivo {
     private Double mediaAvaliacao;
     private Integer contagemAvaliacoes;
 
+    private Boolean excluido;
+
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "tb_espaco_esportivo_esporte",
             joinColumns = @JoinColumn(name = "id_espaco_esportivo"),
@@ -93,6 +95,7 @@ public class EspacoEsportivo {
         this.periodoLocacao = request.getPeriodoLocacao();
         this.maxLocacaoDia = request.getMaxLocacaoDia();
         this.contagemAvaliacoes = 0;
+        this.excluido = false;
 
         String strImgFormatada = StrUtils.removerPrefixoBase64(request.getImagemBase64());
         this.imagemBase64 = Base64.getDecoder().decode(strImgFormatada);

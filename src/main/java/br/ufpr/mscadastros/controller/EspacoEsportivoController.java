@@ -61,11 +61,11 @@ public class EspacoEsportivoController {
     }
 
     @GetMapping("/existe-por-id/{espEsportivoId}")
-    public ResponseEntity<Boolean> existeEsportePorId(@PathVariable Long espEsportivoId,
-                                                              @RequestHeader("AuthorizationApi") String token) {
+    public ResponseEntity<Boolean> existeEEPorId(@PathVariable Long espEsportivoId,
+                                                 @RequestHeader("AuthorizationApi") String token) {
         //validar token
         tokenService.validarTokenMs(token);
-        return ResponseEntity.status(HttpStatus.OK).body(repository.existsById(espEsportivoId));
+        return ResponseEntity.status(HttpStatus.OK).body(espacoEsportivoService.existeEEPorId(espEsportivoId));
     }
 
     @PostMapping("/buscar-inf-complementares-locacao")
