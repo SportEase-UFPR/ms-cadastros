@@ -73,6 +73,7 @@ public class EspacoEsportivoService {
         return new EspEsportivoBuscaResponse(ee);
     }
 
+    @Transactional
     public EspEsportivoExclusaoResponse excluirEspacoEsportivoPorId(Long espEsportivoId) {
         EspacoEsportivo ee = repository.findById(espEsportivoId)
                 .orElseThrow(() -> new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO));
