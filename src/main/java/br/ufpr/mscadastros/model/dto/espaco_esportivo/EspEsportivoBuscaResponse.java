@@ -35,6 +35,7 @@ public class EspEsportivoBuscaResponse {
     private Integer maxLocacaoDia;
     private List<EsporteResponse> listaEsportes = new ArrayList<>();
     private Double mediaAvaliacoes;
+    private Integer contagemAvaliacoes;
     private String imagemBase64;
     private List<Integer> diasFuncionamento;
 
@@ -64,5 +65,7 @@ public class EspEsportivoBuscaResponse {
         this.diasFuncionamento = Arrays.stream(ee.getDiasFuncionamento().split(","))
                 .map(Integer::parseInt)
                 .toList();
+
+        this.contagemAvaliacoes = ee.getContagemAvaliacoes();
     }
 }
