@@ -65,7 +65,6 @@ public class EspEsportivoBuscaResponse {
         this.diasFuncionamento = Arrays.stream(ee.getDiasFuncionamento().split(","))
                 .map(Integer::parseInt)
                 .toList();
-
         this.contagemAvaliacoes = ee.getContagemAvaliacoes();
     }
 }
