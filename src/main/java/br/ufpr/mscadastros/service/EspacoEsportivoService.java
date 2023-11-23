@@ -105,7 +105,7 @@ public class EspacoEsportivoService {
         ee.editarDados(request);
 
         //Buscar esportes, validar se eles existem e vinculá-los ao espaço esportivo a ser editado
-        if (!request.getListaEsportes().isEmpty()) {
+        if (request.getListaEsportes() != null && !request.getListaEsportes().isEmpty()) {
             ee.setListaEsportes(new ArrayList<>());
 
             request.getListaEsportes().forEach(esporte -> {
