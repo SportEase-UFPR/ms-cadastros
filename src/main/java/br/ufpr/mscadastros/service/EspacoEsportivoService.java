@@ -3,6 +3,7 @@ package br.ufpr.mscadastros.service;
 import br.ufpr.mscadastros.client.MsComunicacoesClient;
 import br.ufpr.mscadastros.client.MsLocacoesClient;
 import br.ufpr.mscadastros.emails.TemplateNotificacoes;
+import br.ufpr.mscadastros.exceptions.BussinessException;
 import br.ufpr.mscadastros.exceptions.EntityNotFoundException;
 import br.ufpr.mscadastros.model.dto.espaco_esportivo.*;
 import br.ufpr.mscadastros.model.dto.locacao.InformacoesComplementaresLocacaoRequest;
@@ -47,6 +48,9 @@ public class EspacoEsportivoService {
             novoEE.getListaEsportes().add(esporteRecuperado);
         });
 
+        if(novoEE.getListaEsportes().isEmpty()) {
+            throw new BussinessException("A lista de esportes não pode estar vazia");
+        }
         novoEE.validarEspacoEsportivo();
 
         repository.save(novoEE);
@@ -97,7 +101,7 @@ public class EspacoEsportivoService {
         EspacoEsportivo ee = repository.findById(espEsportivoId)
                 .orElseThrow(() -> new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO));
 
-        if (ee.getExcluido()) {
+        if (Boolean.TRUE.equals(ee.getExcluido())) {
             throw new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO);
         }
 
@@ -165,7 +169,7 @@ public class EspacoEsportivoService {
         var espacoEsportivo = repository.findById(idEspacoEsportivo)
                 .orElseThrow(() -> new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO));
 
-        if (espacoEsportivo.getExcluido()) {
+        if (Boolean.TRUE.equals(espacoEsportivo.getExcluido())) {
             throw new EntityNotFoundException(ESPACO_ESPORTIVO_NAO_CADASTRADO);
         }
 
