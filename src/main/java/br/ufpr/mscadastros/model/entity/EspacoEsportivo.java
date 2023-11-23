@@ -161,7 +161,7 @@ public class EspacoEsportivo {
         Duration duracaoCiclo = Duration.between(LocalTime.MIN, periodoLocacao);
         Duration duracaoAberturaEFechamento = Duration.between(horaAbertura, horaFechamento);
 
-        if(listaEsportes.isEmpty()) {
+        if(listaEsportes != null && listaEsportes.isEmpty()) {
             throw new BussinessException("A lista de esportes não pode estar vazia");
         }
         if(horaAbertura.isAfter(horaFechamento)) {
