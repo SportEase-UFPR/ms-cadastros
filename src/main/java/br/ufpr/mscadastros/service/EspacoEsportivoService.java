@@ -106,10 +106,9 @@ public class EspacoEsportivoService {
         }
 
         var disponivel = ee.getDisponivel();
-        ee.editarDados(request);
 
         //Buscar esportes, validar se eles existem e vinculá-los ao espaço esportivo a ser editado
-        if (!request.getListaEsportes().isEmpty()) {
+        if (request.getListaEsportes() != null && !request.getListaEsportes().isEmpty()) {
             ee.setListaEsportes(new ArrayList<>());
 
             request.getListaEsportes().forEach(esporte -> {
@@ -119,6 +118,7 @@ public class EspacoEsportivoService {
             });
         }
 
+        ee.editarDados(request);
         ee.validarEspacoEsportivo();
 
         //caso o espaço esportivo ficar indisponível ou disponível, os clientes devem ser notificados

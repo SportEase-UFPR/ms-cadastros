@@ -153,8 +153,6 @@ public class EspacoEsportivo {
                     .map(String::valueOf)
                     .collect(Collectors.joining(","));
         }
-
-        this.listaEsportes = new ArrayList<>();
     }
 
     public void validarEspacoEsportivo() {
