@@ -1,0 +1,1 @@
+INSERT IGNORE INTO cadastros.tb_administradores (id, cpf, email, id_usuario, nome) VALUES (1, '00000000000' ,'adm@gmail.com', 1, 'adm');
